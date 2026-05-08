@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -6,7 +7,7 @@ const userSchema = new mongoose.Schema({
     required: [true, 'O nome de usuário é obrigatório'],
     unique: true,
     trim: true,
-    lowercase: true,
+    lowercase: true, // Garante que "USUARIO" e "usuario" sejam salvos como "usuario"
     minlength: [3, 'O username deve ter pelo menos 3 caracteres']
   },
   email: {
@@ -21,24 +22,31 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'A senha é obrigatória'],
     minlength: [6, 'A senha deve ter pelo menos 6 caracteres'],
-    select: false // Evita que a senha seja retornada em consultas GET comuns por segurança
+    select: false // Não retorna a senha nas consultas por padrão
   },
   bio: {
     type: String,
-    maxlength: [160, 'A bio pode ter no máximo 160 caracteres'],
+    maxlength: 160,
     default: ""
-  },
-  profilePicture: {
-    type: String,
-    default: "https://via.placeholder.com/150"
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
 }, {
-  timestamps: true // Cria automaticamente os campos 'createdAt' e 'updatedAt'
+  timestamps: true
 });
+
+// Middleware do Mongoose: Criptografa a senha antes de salvar o usuário
+userSchema.pre('save', async function(next) {
+  // Só criptografa se a senha for nova ou estiver sendo modificada
+  if (!this.isModified('password')) return next();
+
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Método para comparar senhas (útil no momento do Login)
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
 
 const User = mongoose.model('User', userSchema);
 
