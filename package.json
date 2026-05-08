@@ -16,5 +16,14 @@
     "express": "^5.2.1",
     "mongoose": "^9.6.1",
     "parser": "^0.1.4"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rafael-be/API-rest.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Rafael-be/API-rest/issues"
+  },
+  "homepage": "https://github.com/Rafael-be/API-rest#readme"
 }
