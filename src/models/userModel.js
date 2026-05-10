@@ -36,11 +36,11 @@ const userSchema = new mongoose.Schema({
 // Criptografa a senha antes de salvar o usuário
 userSchema.pre('save', async function(next) {
   
-  if (!this.isModified('password')) return next();// Só criptografa se a senha for nova ou estiver sendo modificada
+  if (!this.isModified('password')) return;// Só criptografa se a senha for nova ou estiver sendo modificada. Next() da um erro com o mongoose, porque ele já entende que quando a promisse acabar ele retorna o que for preciso
 
   const salt = await bcrypt.genSalt(10); //Caso tenha senhas iguais de usuários diferentes, gera uma aleatoreidade para terem hashes diferentes
   this.password = await bcrypt.hash(this.password, salt); //Encripta a senha
-  next();
+
 });
 
 // Comparar senhas:

@@ -60,3 +60,42 @@ exports.login = async (req, res) => {
     res.status(500).json({ status: 'error', message: err.message });
   }
 };
+
+// Mostrar usuarios (GET)
+exports.mostrarUsuarios = async (req, res) => {
+  try {
+
+    const usuarios = await User.find();// .find() sem nada dentro traz TUDO da coleção
+
+    res.status(200).json({
+      status: 'success',
+      resultados: usuarios.length,
+      informacoes: { usuarios }
+    });
+  }
+  catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: err.message
+    });
+  }
+};
+
+// Excluir usuário (DELETE)
+exports.deletarUsuario = async (req, res) => {
+  try {
+    const id = req.params.id; // Pegamos o ID da URL
+    const usuarioDeletado = await User.findByIdAndDelete(id); 
+
+    if (!usuarioDeletado) {
+      return res.status(404).json({ message: 'Usuário não encontrado' });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Usuário excluído com sucesso!'
+    });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};

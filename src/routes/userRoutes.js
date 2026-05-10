@@ -8,4 +8,8 @@ router.post('/cadastro', userController.cadastro);// No Talend: POST http://loca
 // Rota para entrar no sistema (Login)
 router.post('/login', userController.login);// No Talend: POST http://localhost:3000/api/users/login
 
+//Rota para mostrar todos os usuários
+router.get('/mostrar', userController.mostrarUsuarios); // No Talend: GET http://localhost:3000/api/users/mostrar
+
+
 module.exports = router;
