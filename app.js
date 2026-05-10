@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const userRoutes = require('./src/routes/userRoutes');
+const comentarioRoutes = require('./src/routes/comentarioRoutes');
 
 const app = express();
 app.use(express.json()); // Permite que a API entenda arquivos JSON vindos do Talend
@@ -19,7 +20,8 @@ conectarBanco();
 
 
 app.use('/api/users', userRoutes);// Toda rota que estiver no userRoutes começará com '/api/users'
+app.use('/api/comentarios', comentarioRoutes);// Toda rota que estiver no userRoutes começará com '/api/users'
 
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
