@@ -1,10 +1,10 @@
 const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 
-
+//O jwt dá um crédito temporário para ter acesso à conta, já o bcrpt criptograda a senha
 const createToken = (id) => {// Criar o Token JWT com o id que será passado ao chamar a função
   return jwt.sign({ id }, process.env.JWT_SECRET, {expiresIn: '1d'});
-  /*retorna a função jwt.sign, que serve para tfabricar o token
+  /*retorna a função jwt.sign, que serve para fabricar o token
   Ela tem 3 parâmetros:
   1- O que você quer gerar o token, por exemplo quero gerar um token com o id tal que foi passado. O id é um objeto, por isso as {}
   2- A chave de encriptação que esta no .env
@@ -12,57 +12,50 @@ const createToken = (id) => {// Criar o Token JWT com o id que será passado ao 
 };
 
 // Cadastro (POST)
-exports.register = async (req, res) => {
+exports.cadastro = async (req, res) => {
   try {
-    
     const { username, email, password, bio } = req.body;
     const newUser = await User.create({ username, email, password, bio });
-    
-    // Oculta a senha no objeto de resposta por segurança
-    newUser.password = undefined;
 
-    const token = createToken(newUser._id);
+    newUser.password = undefined;// Oculta a senha por segurança
+
+    const token = createToken(newUser._id); // '_id' é a chave primária que os objetos ganham no mongoDB
 
     res.status(201).json({
       status: 'success',
       token,
-      data: { user: newUser }
+      informacoes: { user: newUser }
     });
-  } catch (err) {
+
+  }
+  catch (err) {
     res.status(400).json({
       status: 'fail',
-      message: err.message // Exibe erros de duplicidade ou validação do Mongoose
+      message: err.message // .message é uma propriedade que fala qual o erro que aconteceu
     });
   }
 };
 
-// --- LOGIN (POST) ---
+// LOGIN (POST)
 exports.login = async (req, res) => {
   try {
+
     const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ message: 'Por favor, informe e-mail e senha' }); //verifica se tem email e senha escritos
 
-    // 1) Verifica se e-mail e senha foram enviados
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Por favor, informe e-mail e senha' });
-    }
+    const usuario = await User.findOne({ email }).select('+password'); // busca a senha no banco de dados (select = false faz ela não aparecer na URL)
+    if (!usuario || !(await usuario.compararSenha(password))) return res.status(401).json({ message: 'E-mail ou senha incorretos' });
+    //o if de cima verifica se o usuario nãp existe (=== false) e se a função que está no model para comparar as senhas retornar falso, ele dá o json com erro
 
-    // 2) Busca o usuário e pede explicitamente a senha (que está com select: false)
-    const user = await User.findOne({ email }).select('+password');
-
-    // 3) Verifica se usuário existe e se a senha bate (usando o método do Model)
-    if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ message: 'E-mail ou senha incorretos' });
-    }
-
-    // 4) Se tudo ok, envia o token
-    const token = createToken(user._id);
-    user.password = undefined;
+    const token = createToken(usuario._id); //cria o token para o usuário se não cair nos erros acima
+    usuario.password = undefined; // oculta a senha para ter segurança
 
     res.status(200).json({
       status: 'success',
       token,
-      data: { user }
+      informacoes: { usuario }
     });
+    
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message });
   }

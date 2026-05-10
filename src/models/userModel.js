@@ -44,8 +44,8 @@ userSchema.pre('save', async function(next) {
 });
 
 // Comparar senhas:
-userSchema.methods.comparePassword = async function(typedPassword) {
-  return await bcrypt.compare(typedPassword, this.password); //função que vai ser chamada no controller, usando a senha digitada no placeholder e comparando com a senha criptografada
+userSchema.methods.compararSenha = async function(senhaDigitada) {
+  return await bcrypt.compare(senhaDigitada, this.password); //função que vai ser chamada no controller, usando a senha digitada no placeholder e comparando com a senha criptografada
 };
 
 const User = mongoose.model('User', userSchema);
