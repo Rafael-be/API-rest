@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 
 //O jwt dá um crédito temporário para ter acesso à conta, já o bcrpt criptograda a senha
-const createToken = (id) => {// Criar o Token JWT com o id que será passado ao chamar a função
+const criarToken = (id) => {// Criar o Token JWT com o id que será passado ao chamar a função
   return jwt.sign({ id }, process.env.JWT_SECRET, {expiresIn: '1d'});
   /*retorna a função jwt.sign, que serve para fabricar o token
   Ela tem 3 parâmetros:
@@ -19,7 +19,7 @@ exports.cadastro = async (req, res) => {
 
     newUser.password = undefined;// Oculta a senha por segurança
 
-    const token = createToken(newUser._id); // '_id' é a chave primária que os objetos ganham no mongoDB
+    const token = criarToken(newUser._id); // '_id' é a chave primária que os objetos ganham no mongoDB
 
     res.status(201).json({
       status: 'success',
@@ -47,7 +47,7 @@ exports.login = async (req, res) => {
     if (!usuario || !(await usuario.compararSenha(password))) return res.status(401).json({ message: 'E-mail ou senha incorretos' });
     //o if de cima verifica se o usuario nãp existe (=== false) e se a função que está no model para comparar as senhas retornar falso, ele dá o json com erro
 
-    const token = createToken(usuario._id); //cria o token para o usuário se não cair nos erros acima
+    const token = criarToken(usuario._id); //cria o token para o usuário se não cair nos erros acima
     usuario.password = undefined; // oculta a senha para ter segurança
 
     res.status(200).json({
@@ -81,21 +81,23 @@ exports.mostrarUsuarios = async (req, res) => {
   }
 };
 
-// Excluir usuário (DELETE)
-exports.deletarUsuario = async (req, res) => {
+// Excluir usuário somente com autorização por token (DELETE protegido)
+exports.deletarConta = async (req, res) => {
   try {
-    const id = req.params.id; // Pegamos o ID da URL
-    const usuarioDeletado = await User.findByIdAndDelete(id); 
 
-    if (!usuarioDeletado) {
-      return res.status(404).json({ message: 'Usuário não encontrado' });
-    }
+    const idUsuario = req.user._id; //vem lá do middleware onde se tudo ocorrer corretamente o usuario atual será o req.ser
+    await User.findByIdAndDelete(idUsuario); //acha e deleta no mongoDB
 
     res.status(200).json({
       status: 'success',
-      message: 'Usuário excluído com sucesso!'
+      message: 'Sua conta foi excluída com sucesso.'
     });
-  } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    
+  }
+  catch (err) {
+    res.status(500).json({ 
+      status: 'error', 
+      message: 'Erro ao tentar excluir a conta: ' + err.message 
+    });
   }
 };
