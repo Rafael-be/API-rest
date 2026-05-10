@@ -7,4 +7,6 @@ router.post('/criar',  autenticacaoMiddleware.proteger, comentarioController.cri
 
 router.get('/mostrar', comentarioController.verComentarios);// No Talend: GET http://localhost:3000/api/comentarios/mostrar
 
+router.delete('/deletar/:id', autenticacaoMiddleware.proteger, comentarioController.deletarComentario); // No Talend: DELETE http://localhost:3000/api/comentarios/deletar
+
 module.exports = router;

@@ -38,3 +38,31 @@ exports.verComentarios = async (req, res) => {
     }
 };
 
+exports.deletarComentario = async (req, res) => {
+  try {
+
+    const comentario = await Comentario.findById(req.params.id); //pega o id do comentário pela URL para excluir
+
+    if (!comentario) {
+      return res.status(404).json({ message: 'Comentário não encontrado' });
+    }
+
+
+    if (!comentario.autor.equals(req.user._id)) { //compara quem esta logado com o token através do middleware e checa se é o mesmo autor do comentário
+      return res.status(403).json({ 
+        message: 'Você não tem permissão para deletar o comentário de outra pessoa' 
+      });
+    }
+
+    // 3. Se passou na verificação, deleta
+    await Comentario.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Comentário removido com sucesso.'
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
