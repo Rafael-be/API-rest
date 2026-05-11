@@ -18,15 +18,15 @@ Funcionalidades Principais:
  
  Estrutura do Projeto:
  O código está organizado seguindo as melhores práticas para facilitar a manutenção e escalabilidade:
-├── .env                  # Variáveis de ambiente (não vai para o GitHub)
-├── .gitignore            # Arquivos ignorados pelo Git
-├── package.json          # Dependências do projeto
-├── app.js                # Ponto de entrada (Configuração do Express e montagem das rotas)
-├── src/
-│   ├── controllers/      # Lógica de negócio (userController.js, comentarioController.js)
-│   ├── middlewares/      # Funções de interceptação (autenticacaoMiddleware.js)
-│   ├── models/           # Schemas do banco de dados (userModel.js, comentarioModel.js)
-│   └── routes/           # Definição dos Endpoints (userRoutes.js, comentarioRoutes.js)
+ - .env para variáveis de ambiente (não vai para o GitHub)
+ - .gitignore para arquivos ignorados pelo Git
+ - package.json para dependências do projeto
+ - app.js - ponto de entrada (Configuração do Express e montagem das rotas)
+ - src:
+│   - controllers/ - Lógica de negócio (userController.js, comentarioController.js)
+│   - middlewares/ - Funções de interceptação (autenticacaoMiddleware.js)
+│   - models/ - Schemas do banco de dados (userModel.js, comentarioModel.js)
+│   - routes/ - Definição dos Endpoints (userRoutes.js, comentarioRoutes.js)
 
 Passo a Passo de como Rodar a Aplicação:
 1. Pré-requisitosCertifique-se de ter instalado em sua máquina:
@@ -60,8 +60,8 @@ No talend, faça as seguintes coisas para ter a experiência de usuário complet
 
 Passo 1: Cadastro de Usuário
 Comece criando seu primeiro usuário. É recomendado criar pelo menos dois usuários para testar as travas de segurança de edição de comentários alheios.
-Método: POST
-URL: http://localhost:3000/api/users/cadastro
+ - Método: POST
+ - URL: http://localhost:3000/api/users/cadastro
 Body (JSON):
 {
   "username": "seu_nome",
@@ -74,8 +74,8 @@ Body (JSON):
 
 Passo 2: Login e Autenticação
 Faça login para gerar seu token de acesso. Sem ele, você não conseguirá acessar as rotas protegidas.
-Método: POST
-URL: http://localhost:3000/api/users/login
+ - Método: POST
+ - URL: http://localhost:3000/api/users/login
 Body (JSON):
 {
   "email": "exemplo@endereco.com",
@@ -86,14 +86,14 @@ IMPORTANTE: Copie o token gerado na resposta. No Talend, em todas as rotas abaix
 
 Passo 3: Mostrar todos os Usuários
 Veja a lista de todos os usuários cadastrados no sistema.
-Método: GET
-URL: http://localhost:3000/api/users/mostrar
+ - Método: GET
+ - URL: http://localhost:3000/api/users/mostrar
 
 
 Passo 4: Criar um Comentário
 Agora que está autenticado, publique algo no sistema.
-Método: POST
-URL: http://localhost:3000/api/comentarios/criar
+ - Método: POST
+ - URL: http://localhost:3000/api/comentarios/criar
 Body (JSON):
 {
   "titulo": "Titulo 1",
@@ -103,14 +103,14 @@ Body (JSON):
 
 Passo 5: Mostrar todos os Comentários
 Visualize todos os comentários publicados por todos os usuários.
-Método: GET
-URL: http://localhost:3000/api/comentarios/mostrar
+ - Método: GET
+ - URL: http://localhost:3000/api/comentarios/mostrar
 
 
 Passo 6: Editar seu Comentário
 Atualize o título ou conteúdo de um comentário criado por você.
-Método: PATCH
-URL: http://localhost:3000/api/comentarios/editar/ID_DO_COMENTARIO
+ - Método: PATCH
+ - URL: http://localhost:3000/api/comentarios/editar/ID_DO_COMENTARIO
 Body (JSON):
 {
   "titulo": "Titulo Atualizado",
