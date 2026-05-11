@@ -23,9 +23,17 @@ Funcionalidades Principais:
  - package.json para dependências do projeto
  - app.js - ponto de entrada (Configuração do Express e montagem das rotas)
  - src:
+
+
 │   - controllers/ - Lógica de negócio (userController.js, comentarioController.js)
+
+
 │   - middlewares/ - Funções de interceptação (autenticacaoMiddleware.js)
+
+
 │   - models/ - Schemas do banco de dados (userModel.js, comentarioModel.js)
+
+
 │   - routes/ - Definição dos Endpoints (userRoutes.js, comentarioRoutes.js)
 
 Passo a Passo de como Rodar a Aplicação:
@@ -71,6 +79,8 @@ Body (JSON):
   "password": "senha_segura",
   "bio": "Bio"
 }
+
+
 (Se quiser criar outra conta para ter melhor visão das próximas features, é recomendado)
 
 
@@ -85,6 +95,8 @@ Body (JSON):
   "email": "exemplo@endereco.com",
   "password": "senha_segura"
 }
+
+
 IMPORTANTE: Copie o token gerado na resposta. No Talend, em todas as rotas abaixo, vá na aba Headers, adicione "Authorization" no nome e "Bearer (valor do TOKEN)" no valor.
 
 
@@ -153,4 +165,6 @@ Teste a remoção de dados.
 
 Deletar Comentário: DELETE em http://localhost:3000/api/comentarios/deletar/ID_DO_COMENTARIO
 
-Deletar Conta: DELETE em http://localhost:3000/api/users/deletar-conta (Isso removerá automaticamente todos os comentários do usuário).
+Deletar Conta: DELETE em http://localhost:3000/api/users/deletar-conta 
+
+(Isso removerá automaticamente todos os comentários do usuário).
