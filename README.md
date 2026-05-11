@@ -62,7 +62,9 @@ Passo 1: Cadastro de Usuário
 Comece criando seu primeiro usuário. É recomendado criar pelo menos dois usuários para testar as travas de segurança de edição de comentários alheios.
  - Método: POST
  - URL: http://localhost:3000/api/users/cadastro
+
 Body (JSON):
+
 {
   "username": "seu_nome",
   "email": "exemplo@endereco.com",
@@ -76,7 +78,9 @@ Passo 2: Login e Autenticação
 Faça login para gerar seu token de acesso. Sem ele, você não conseguirá acessar as rotas protegidas.
  - Método: POST
  - URL: http://localhost:3000/api/users/login
+
 Body (JSON):
+
 {
   "email": "exemplo@endereco.com",
   "password": "senha_segura"
@@ -94,7 +98,9 @@ Passo 4: Criar um Comentário
 Agora que está autenticado, publique algo no sistema.
  - Método: POST
  - URL: http://localhost:3000/api/comentarios/criar
+
 Body (JSON):
+
 {
   "titulo": "Titulo 1",
   "conteudo": "Primeiro comentário"
@@ -111,7 +117,9 @@ Passo 6: Editar seu Comentário
 Atualize o título ou conteúdo de um comentário criado por você.
  - Método: PATCH
  - URL: http://localhost:3000/api/comentarios/editar/ID_DO_COMENTARIO
+
 Body (JSON):
+
 {
   "titulo": "Titulo Atualizado",
   "conteudo": "Conteúdo modificado"
@@ -121,7 +129,9 @@ Body (JSON):
 Passo 7: Atualizar Perfil e Senha
 Gerencie seus dados de conta.
 Perfil: PATCH em http://localhost:3000/api/users/atualizar-perfil 
+
 Body: 
+
 {
  "username": "",
  "email": "",
@@ -129,7 +139,9 @@ Body:
  }
 
 Senha: PATCH em http://localhost:3000/api/users/atualizar-senha 
+
 Body: 
+
 {
  "senhaAtual": "",
  "novaSenha": ""
