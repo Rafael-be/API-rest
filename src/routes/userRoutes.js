@@ -9,7 +9,11 @@ router.post('/login', userController.login);// No Talend: POST http://localhost:
 
 router.get('/mostrar', userController.mostrarUsuarios); // No Talend: GET http://localhost:3000/api/users/mostrar
 
-router.delete('/deletar-conta', autenticacaoMiddleware.proteger, userController.deletarConta);// No Talend: DELETE http://localhost:3000/api/users/deletar-conta
+router.delete('/deletar-conta', autenticacaoMiddleware.verificarToken, userController.deletarConta);// No Talend: DELETE http://localhost:3000/api/users/deletar-conta
+
+router.patch('/atualizar-senha', autenticacaoMiddleware.verificarToken, userController.atualizarSenha);// No Talend: PATCH http://localhost:3000/api/users/atualiza-senha
+
+router.patch('/atualizar-perfil', autenticacaoMiddleware.verificarToken, userController.atualizarPerfil); // No Talend: PATCH http://localhost:3000/api/users/atualiza-perfil
 
 
 module.exports = router;

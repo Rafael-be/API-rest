@@ -1,5 +1,13 @@
 const Comentario = require('../models/comentarioModel');
 
+const verificarDono = (comentario, idUsuarioAtual) => { //função para verificar se quem esta tentando fazer alguma ação é o dono do próprio comentário
+  if (!comentario.autor.equals(idUsuarioAtual)) {
+    const erro = new Error('Sem permissão');
+    erro.statusCode = 403;
+    throw erro;
+  }
+};
+
 exports.criarComentario = async (req, res) => {
   try {
 
@@ -47,22 +55,49 @@ exports.deletarComentario = async (req, res) => {
       return res.status(404).json({ message: 'Comentário não encontrado' });
     }
 
+    verificarDono(comentario, req.user._id); //verifica se tem permissão de excluir (é o mesmo dono)
 
-    if (!comentario.autor.equals(req.user._id)) { //compara quem esta logado com o token através do middleware e checa se é o mesmo autor do comentário
-      return res.status(403).json({ 
-        message: 'Você não tem permissão para deletar o comentário de outra pessoa' 
-      });
-    }
-
-    // 3. Se passou na verificação, deleta
-    await Comentario.findByIdAndDelete(req.params.id);
+    await Comentario.findByIdAndDelete(req.params.id); // Se passou na verificação, deleta
 
     res.status(200).json({
       status: 'success',
       message: 'Comentário removido com sucesso.'
     });
 
-  } catch (err) {
+  }
+  catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.editarComentario = async (req, res) => {
+  try {
+    const { titulo, conteudo } = req.body;
+    const comentarioOriginal = await Comentario.findById(req.params.id); // busca o comentario original
+
+    if (!comentarioOriginal) {
+      return res.status(404).json({ message: 'Comentário não encontrado' });
+    }
+
+    verificarDono(comentarioOriginal, req.user._id);
+
+
+    const comentarioAtualizado = await Comentario.findByIdAndUpdate(req.params.id, { titulo, conteudo }, { new: true, runValidators: true }); 
+    /*findByIdAndUdate usa 3 parâmetros:
+    1 - id para se localizar
+    2 - o que quer mudar em forma de objeto
+    3 - As especificações, como por exemplo:
+    new: faz com que o mongoose envie esse como sendo o comentario final, já atualizado
+    runValidators: faz com que as requisições do esquema sejam conferidas (como required)
+    */
+
+    res.status(200).json({
+      status: 'success',
+      data: { comentario: comentarioAtualizado }
+    });
+
+  }
+  catch (err) {
+    res.status(500).json({ status: 'fail', message: err.message });
   }
 };

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 
-exports.proteger = async (req, res, next) => {
+exports.verificarToken = async (req, res, next) => {
   try {
     let token;
     
@@ -17,7 +17,7 @@ exports.proteger = async (req, res, next) => {
     const usuarioAtual = await User.findById(decoded.id); //procura o usuario com o id gerado pelo jwt.verify. O verify gera um objeto com várias propriedades e para buscar o id uas o .id ao final
     
     if (!usuarioAtual) {
-      return res.status(401).json({ message: 'O usuário deste token não existe mais.' });
+      return res.status(401).json({ message: 'O usuário deste token não existe' });
     }
 
     req.user = usuarioAtual; // Aqui o usuário logado fica disponível para a próxima função

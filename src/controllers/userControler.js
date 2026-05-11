@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const Comentario = require('../models/comentarioModel')
 const jwt = require('jsonwebtoken');
 
 //O jwt dá um crédito temporário para ter acesso à conta, já o bcrpt criptograda a senha
@@ -86,11 +87,12 @@ exports.deletarConta = async (req, res) => {
   try {
 
     const idUsuario = req.user._id; //vem lá do middleware onde se tudo ocorrer corretamente o usuario atual será o req.ser
+    await Comentario.deleteMany({ autor: idUsuario }); //Antes de deletar o usuario, ele entra e deleta todos os comentarios com o autor === à idUsuario
     await User.findByIdAndDelete(idUsuario); //acha e deleta no mongoDB
 
     res.status(200).json({
       status: 'success',
-      message: 'Sua conta foi excluída com sucesso.'
+      message: 'Sua conta foi excluída com sucesso. (seus comentários também foram)'
     });
     
   }
@@ -99,5 +101,63 @@ exports.deletarConta = async (req, res) => {
       status: 'error', 
       message: 'Erro ao tentar excluir a conta: ' + err.message 
     });
+  }
+};
+
+exports.atualizarSenha = async (req, res) => {
+  try {
+
+    const { senhaAtual, novaSenha } = req.body; //dados vindos do body
+
+    const usuario = await User.findById(req.user._id).select('+password'); //precisa dar .select('+password') porque a senha no model esta com select = false, por segurança
+
+    const senhaCorreta = await usuario.compararSenha(senhaAtual); //usa o método do model para comparar a senha e ver se esta correta
+    
+    if (!senhaCorreta) {
+      return res.status(401).json({ message: 'Sua senha atual está incorreta.' });
+    }
+
+    usuario.password = novaSenha; //Se estiver correta, atualizar para a nova senha
+    await usuario.save();// .save é usado para salvar e passar pela encriptação do model, que é ativada antes de usar .save
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Senha atualizada com sucesso!'
+    });
+
+  }
+  catch (err) {
+    res.status(500).json({ status: 'fail', message: err.message });
+  }
+};
+
+exports.atualizarPerfil = async (req, res) => {
+  try {
+
+    const { username, email, bio } = req.body; //define o que pdoe ser mudado ou não
+    const camposAtualizados = {};
+
+    if (username) camposAtualizados.username = username;
+    if (email) camposAtualizados.email = email;
+    if (bio) camposAtualizados.bio = bio;
+
+    //atualiza o usuario logado e autenticado pelo middleware
+    const usuario = await User.findByIdAndUpdate(req.user._id, camposAtualizados, {new: true,runValidators: true});
+    /*findByIdAndUdate usa 3 parâmetros:
+    1 - id para se localizar
+    2 - o que quer mudar em forma de objeto
+    3 - As especificações, como por exemplo:
+    new: faz com que o mongoose envie esse como sendo o comentario atualizado
+    runValidators: faz com que as requisições do esquema sejam conferidas (como required)
+    */
+
+    res.status(200).json({
+      status: 'success',
+      data: { user: usuario }
+    });
+
+  }
+  catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
   }
 };
