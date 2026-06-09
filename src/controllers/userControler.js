@@ -2,25 +2,33 @@ const User = require('../models/userModel');
 const Comentario = require('../models/comentarioModel')
 const jwt = require('jsonwebtoken');
 
-//O jwt dá um crédito temporário para ter acesso à conta, já o bcrpt criptograda a senha
-const criarToken = (id) => {// Criar o Token JWT com o id que será passado ao chamar a função
+/**
+ * Cria um token JWT para identificar o usuário autenticado.
+ *
+ * O token contém apenas o id do usuário e expira em um dia.
+ *
+ * @param {string|ObjectId} id Identificador do usuário.
+ * @returns {string} Token JWT assinado com `JWT_SECRET`.
+ */
+const criarToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {expiresIn: '1d'});
-  /*retorna a função jwt.sign, que serve para fabricar o token
-  Ela tem 3 parâmetros:
-  1- O que você quer gerar o token, por exemplo quero gerar um token com o id tal que foi passado. O id é um objeto, por isso as {}
-  2- A chave de encriptação que esta no .env
-  3- Validade do token. '1d' = 1 dia. Também é um objeto, por isso o {}*/
 };
 
-// Cadastro (POST)
+/**
+ * Cadastra um novo usuário e retorna o token de autenticação.
+ *
+ * @param {Request} req Requisição com `username`, `email`, `password` e `bio` opcional no body.
+ * @param {Response} res Resposta HTTP com o usuário criado e o token JWT.
+ * @returns {Promise<void>}
+ */
 exports.cadastro = async (req, res) => {
   try {
     const { username, email, password, bio } = req.body;
     const newUser = await User.create({ username, email, password, bio });
 
-    newUser.password = undefined;// Oculta a senha por segurança
+    newUser.password = undefined;
 
-    const token = criarToken(newUser._id); // '_id' é a chave primária que os objetos ganham no mongoDB
+    const token = criarToken(newUser._id);
 
     res.status(201).json({
       status: 'success',
@@ -37,19 +45,24 @@ exports.cadastro = async (req, res) => {
   }
 };
 
-// LOGIN (POST)
+/**
+ * Autentica um usuário existente e retorna um token JWT.
+ *
+ * @param {Request} req Requisição com `email` e `password` no body.
+ * @param {Response} res Resposta HTTP com o usuário autenticado e o token JWT.
+ * @returns {Promise<void>}
+ */
 exports.login = async (req, res) => {
   try {
 
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ message: 'Por favor, informe e-mail e senha' }); //verifica se tem email e senha escritos
+    if (!email || !password) return res.status(400).json({ message: 'Por favor, informe e-mail e senha' });
 
-    const usuario = await User.findOne({ email }).select('+password'); // busca a senha no banco de dados (select = false faz ela não aparecer na URL)
+    const usuario = await User.findOne({ email }).select('+password');
     if (!usuario || !(await usuario.compararSenha(password))) return res.status(401).json({ message: 'E-mail ou senha incorretos' });
-    //o if de cima verifica se o usuario nãp existe (=== false) e se a função que está no model para comparar as senhas retornar falso, ele dá o json com erro
 
-    const token = criarToken(usuario._id); //cria o token para o usuário se não cair nos erros acima
-    usuario.password = undefined; // oculta a senha para ter segurança
+    const token = criarToken(usuario._id);
+    usuario.password = undefined;
 
     res.status(200).json({
       status: 'success',
@@ -62,11 +75,19 @@ exports.login = async (req, res) => {
   }
 };
 
-// Mostrar usuarios (GET)
+/**
+ * Lista todos os usuários cadastrados.
+ *
+ * A senha não é retornada porque o campo `password` possui `select: false` no model.
+ *
+ * @param {Request} req Requisição HTTP.
+ * @param {Response} res Resposta HTTP com a lista de usuários.
+ * @returns {Promise<void>}
+ */
 exports.mostrarUsuarios = async (req, res) => {
   try {
 
-    const usuarios = await User.find();// .find() sem nada dentro traz TUDO da coleção
+    const usuarios = await User.find();
 
     res.status(200).json({
       status: 'success',
@@ -82,13 +103,21 @@ exports.mostrarUsuarios = async (req, res) => {
   }
 };
 
-// Excluir usuário somente com autorização por token (DELETE protegido)
+/**
+ * Exclui a conta do usuário autenticado e remove seus comentários.
+ *
+ * Depende do middleware de autenticação para preencher `req.user`.
+ *
+ * @param {Request} req Requisição autenticada com `user` preenchido pelo middleware.
+ * @param {Response} res Resposta HTTP com confirmação da exclusão.
+ * @returns {Promise<void>}
+ */
 exports.deletarConta = async (req, res) => {
   try {
 
-    const idUsuario = req.user._id; //vem lá do middleware onde se tudo ocorrer corretamente o usuario atual será o req.ser
-    await Comentario.deleteMany({ autor: idUsuario }); //Antes de deletar o usuario, ele entra e deleta todos os comentarios com o autor === à idUsuario
-    await User.findByIdAndDelete(idUsuario); //acha e deleta no mongoDB
+    const idUsuario = req.user._id;
+    await Comentario.deleteMany({ autor: idUsuario });
+    await User.findByIdAndDelete(idUsuario);
 
     res.status(200).json({
       status: 'success',
@@ -104,21 +133,31 @@ exports.deletarConta = async (req, res) => {
   }
 };
 
+/**
+ * Atualiza a senha do usuário autenticado após validar a senha atual.
+ *
+ * A nova senha é atribuída ao documento e salva com `.save()` para acionar o hook
+ * de criptografia definido no model.
+ *
+ * @param {Request} req Requisição autenticada com `senhaAtual` e `novaSenha` no body.
+ * @param {Response} res Resposta HTTP com confirmação da alteração.
+ * @returns {Promise<void>}
+ */
 exports.atualizarSenha = async (req, res) => {
   try {
 
-    const { senhaAtual, novaSenha } = req.body; //dados vindos do body
+    const { senhaAtual, novaSenha } = req.body;
 
-    const usuario = await User.findById(req.user._id).select('+password'); //precisa dar .select('+password') porque a senha no model esta com select = false, por segurança
+    const usuario = await User.findById(req.user._id).select('+password');
 
-    const senhaCorreta = await usuario.compararSenha(senhaAtual); //usa o método do model para comparar a senha e ver se esta correta
+    const senhaCorreta = await usuario.compararSenha(senhaAtual);
     
     if (!senhaCorreta) {
       return res.status(401).json({ message: 'Sua senha atual está incorreta.' });
     }
 
-    usuario.password = novaSenha; //Se estiver correta, atualizar para a nova senha
-    await usuario.save();// .save é usado para salvar e passar pela encriptação do model, que é ativada antes de usar .save
+    usuario.password = novaSenha;
+    await usuario.save();
 
     res.status(200).json({
       status: 'success',
@@ -131,25 +170,27 @@ exports.atualizarSenha = async (req, res) => {
   }
 };
 
+/**
+ * Atualiza os dados editáveis do perfil do usuário autenticado.
+ *
+ * Apenas `username`, `email` e `bio` são aceitos. Campos ausentes permanecem
+ * inalterados, e as validações do schema são executadas pelo Mongoose.
+ *
+ * @param {Request} req Requisição autenticada com campos de perfil no body.
+ * @param {Response} res Resposta HTTP com o usuário atualizado.
+ * @returns {Promise<void>}
+ */
 exports.atualizarPerfil = async (req, res) => {
   try {
 
-    const { username, email, bio } = req.body; //define o que pdoe ser mudado ou não
+    const { username, email, bio } = req.body;
     const camposAtualizados = {};
 
     if (username) camposAtualizados.username = username;
     if (email) camposAtualizados.email = email;
     if (bio) camposAtualizados.bio = bio;
 
-    //atualiza o usuario logado e autenticado pelo middleware
     const usuario = await User.findByIdAndUpdate(req.user._id, camposAtualizados, {new: true,runValidators: true});
-    /*findByIdAndUdate usa 3 parâmetros:
-    1 - id para se localizar
-    2 - o que quer mudar em forma de objeto
-    3 - As especificações, como por exemplo:
-    new: faz com que o mongoose envie esse como sendo o comentario atualizado
-    runValidators: faz com que as requisições do esquema sejam conferidas (como required)
-    */
 
     res.status(200).json({
       status: 'success',

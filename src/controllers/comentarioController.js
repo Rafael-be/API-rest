@@ -1,6 +1,14 @@
 const Comentario = require('../models/comentarioModel');
 
-const verificarDono = (comentario, idUsuarioAtual) => { //função para verificar se quem esta tentando fazer alguma ação é o dono do próprio comentário
+/**
+ * Verifica se o usuário autenticado é o autor do comentário.
+ *
+ * @param {Object} comentario Comentário encontrado no banco.
+ * @param {ObjectId|string} idUsuarioAtual Id do usuário autenticado.
+ * @throws {Error} Lança erro com `statusCode` 403 quando o usuário não é o autor.
+ * @returns {void}
+ */
+const verificarDono = (comentario, idUsuarioAtual) => {
   if (!comentario.autor.equals(idUsuarioAtual)) {
     const erro = new Error('Sem permissão');
     erro.statusCode = 403;
@@ -8,13 +16,22 @@ const verificarDono = (comentario, idUsuarioAtual) => { //função para verifica
   }
 };
 
+/**
+ * Cria um comentário vinculado ao usuário autenticado.
+ *
+ * Depende do middleware de autenticação para preencher `req.user` com `_id` e `username`.
+ *
+ * @param {Request} req Requisição autenticada com `titulo` e `conteudo` no body.
+ * @param {Response} res Resposta HTTP com o comentário criado.
+ * @returns {Promise<void>}
+ */
 exports.criarComentario = async (req, res) => {
   try {
 
-    const novoComentario = await Comentario.create({ // Pega o título e conteudo do body e o autor pelo Middleware de autenticação
+    const novoComentario = await Comentario.create({
       titulo: req.body.titulo,
       conteudo: req.body.conteudo,
-      autor: req.user._id, // O ID do usuário que é passado pelo Middleware
+      autor: req.user._id,
       nomeAutor: req.user.username
     });
 
@@ -27,10 +44,19 @@ exports.criarComentario = async (req, res) => {
   }
 };
 
+/**
+ * Lista todos os comentários publicados.
+ *
+ * Remove o campo interno `__v` da resposta.
+ *
+ * @param {Request} req Requisição HTTP.
+ * @param {Response} res Resposta HTTP com a lista de comentários.
+ * @returns {Promise<void>}
+ */
 exports.verComentarios = async (req, res) => {
     try {
     
-        const comentarios = await Comentario.find().select('-__v'); // __v é uma propriedade do banco que eu quero que não seja mostrada, o select diz o que você não quer mostrar ou só quer mostrar
+        const comentarios = await Comentario.find().select('-__v');
 
         res.status(200).json({
         status: 'success',
@@ -46,18 +72,25 @@ exports.verComentarios = async (req, res) => {
     }
 };
 
+/**
+ * Remove um comentário quando o usuário autenticado é o autor.
+ *
+ * @param {Request} req Requisição autenticada com `id` do comentário em `params`.
+ * @param {Response} res Resposta HTTP com confirmação da exclusão.
+ * @returns {Promise<void>}
+ */
 exports.deletarComentario = async (req, res) => {
   try {
 
-    const comentario = await Comentario.findById(req.params.id); //pega o id do comentário pela URL para excluir
+    const comentario = await Comentario.findById(req.params.id);
 
     if (!comentario) {
       return res.status(404).json({ message: 'Comentário não encontrado' });
     }
 
-    verificarDono(comentario, req.user._id); //verifica se tem permissão de excluir (é o mesmo dono)
+    verificarDono(comentario, req.user._id);
 
-    await Comentario.findByIdAndDelete(req.params.id); // Se passou na verificação, deleta
+    await Comentario.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       status: 'success',
@@ -70,10 +103,17 @@ exports.deletarComentario = async (req, res) => {
   }
 };
 
+/**
+ * Atualiza um comentário quando o usuário autenticado é o autor.
+ *
+ * @param {Request} req Requisição autenticada com `id` em `params` e `titulo`/`conteudo` no body.
+ * @param {Response} res Resposta HTTP com o comentário atualizado.
+ * @returns {Promise<void>}
+ */
 exports.editarComentario = async (req, res) => {
   try {
     const { titulo, conteudo } = req.body;
-    const comentarioOriginal = await Comentario.findById(req.params.id); // busca o comentario original
+    const comentarioOriginal = await Comentario.findById(req.params.id);
 
     if (!comentarioOriginal) {
       return res.status(404).json({ message: 'Comentário não encontrado' });
@@ -83,13 +123,6 @@ exports.editarComentario = async (req, res) => {
 
 
     const comentarioAtualizado = await Comentario.findByIdAndUpdate(req.params.id, { titulo, conteudo }, { new: true, runValidators: true }); 
-    /*findByIdAndUdate usa 3 parâmetros:
-    1 - id para se localizar
-    2 - o que quer mudar em forma de objeto
-    3 - As especificações, como por exemplo:
-    new: faz com que o mongoose envie esse como sendo o comentario final, já atualizado
-    runValidators: faz com que as requisições do esquema sejam conferidas (como required)
-    */
 
     res.status(200).json({
       status: 'success',

@@ -1,5 +1,12 @@
 # API REST com Node.js, Express e MongoDB
 
+![Node.js](https://img.shields.io/badge/Node.js-API-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-5.x-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![Swagger](https://img.shields.io/badge/Docs-Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+![License](https://img.shields.io/badge/License-ISC-blue?style=for-the-badge)
+
 API REST desenvolvida em Node.js para gerenciamento de usuários e publicações de comentários.
 O projeto implementa autenticação com JWT, criptografia de senhas, validações com Mongoose e controle de permissão para que apenas o autor possa editar ou excluir seus próprios comentários.
 
@@ -8,6 +15,7 @@ O projeto implementa autenticação com JWT, criptografia de senhas, validaçõe
 - [Stack tecnológica](#stack-tecnológica)
 - [Funcionalidades](#funcionalidades)
 - [Demonstração e documentação](#demonstração-e-documentação)
+- [Documentação interna](#documentação-interna)
 - [Estrutura do projeto](#estrutura-do-projeto)
 - [Pré-requisitos](#pré-requisitos)
 - [Como rodar o projeto](#como-rodar-o-projeto)
@@ -42,6 +50,7 @@ O projeto implementa autenticação com JWT, criptografia de senhas, validaçõe
 - Exclusão de comentários apenas pelo autor.
 - Validação de dados com Mongoose.
 - Documentação interativa com Swagger.
+- Documentação interna com JSDoc em models, controllers e middlewares.
 
 ## Demonstração e documentação
 
@@ -52,6 +61,22 @@ http://localhost:3000/api-docs
 ```
 
 Nessa página é possível visualizar os endpoints, os corpos esperados das requisições e testar a API diretamente pelo navegador.
+
+## Documentação interna
+
+O projeto também possui documentação interna em JSDoc nos principais pontos da aplicação:
+
+- `src/models`: descreve schemas, validações, hooks do Mongoose e métodos de instância.
+- `src/controllers`: documenta os handlers HTTP, os dados esperados no `body`/`params` e os retornos.
+- `src/middlewares`: documenta o fluxo de autenticação JWT e o preenchimento de `req.user`.
+
+As rotas continuam documentadas com blocos `@swagger`, usados pelo `swagger-jsdoc` para montar a página interativa em `/api-docs`.
+
+Caso queira gerar uma documentação estática a partir dos comentários JSDoc, rode:
+
+```bash
+npx jsdoc src/models src/controllers src/middlewares -d docs/jsdoc
+```
 
 ## Estrutura do projeto
 
@@ -292,3 +317,4 @@ Ao excluir a conta, todos os comentários vinculados ao usuário também são re
 - A senha nunca é retornada nas consultas de usuário.
 - O token JWT expira em `1d`, conforme definido no controller de usuários.
 - A documentação do Swagger é gerada a partir dos comentários presentes nos arquivos de rotas.
+- A documentação interna em JSDoc fica nos models, controllers e middlewares para apoiar manutenção e evolução do código.

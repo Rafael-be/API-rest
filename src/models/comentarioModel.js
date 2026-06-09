@@ -1,5 +1,13 @@
 const mongoose = require('mongoose');
 
+/**
+ * Schema de comentários publicados por usuários autenticados.
+ *
+ * Cada comentário guarda a referência do autor em `autor` e uma cópia do nome em
+ * `nomeAutor`, facilitando a listagem pública sem precisar popular o usuário.
+ *
+ * @type {mongoose.Schema}
+ */
 const comentarioSchema = new mongoose.Schema({
   titulo: {
     type: String,
@@ -12,8 +20,8 @@ const comentarioSchema = new mongoose.Schema({
     trim: true
   },
   autor: {
-    type: mongoose.Schema.Types.ObjectId, // Guardam o ID do usuário
-    ref: 'User', // Nome do Model criado para o usuario
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: [true, 'ID não encontrado']
   },
   nomeAutor: {
@@ -22,4 +30,9 @@ const comentarioSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+/**
+ * Model Mongoose responsável pela coleção de comentários.
+ *
+ * @type {mongoose.Model}
+ */
 module.exports = mongoose.model('Comentario', comentarioSchema);
