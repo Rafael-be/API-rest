@@ -1,170 +1,299 @@
-Esta é uma API REST completa e segura desenvolvida em Node.js, focada no gerenciamento de usuários e publicações de comentários.
-O sistema conta com autenticação por Tokens (JWT), criptografia de senhas, validação de dados e relacionamento entre coleções no banco de dados.
-Este projeto foi construído utilizando as seguintes ferramentas e bibliotecas:
- - Node.js & Express.js: Base da aplicação e gerenciamento de rotas.
- - MongoDB & Mongoose: Banco de dados NoSQL e modelagem de dados (Schemas, Models, Hooks de pre-save).
- - Bcrypt.js: Criptografia unidirecional de senhas para segurança do usuário.
- - JSON Web Token (JWT): Geração e verificação de tokens para sessões de usuários.
- - Dotenv: Gerenciamento de variáveis de ambiente.
- - Git: Versionamento de código.
- - Talend API Tester: Ferramentas utilizadas para teste e validação das rotas durante o desenvolvimento.
+# API REST com Node.js, Express e MongoDB
 
-Funcionalidades Principais:
- - Arquitetura Modular: Separação clara de responsabilidades (Controllers, Models, Rotas e Middlewares).
- - Autenticação e Autorização: Middlewares que garantem que apenas usuários logados acessem certas rotas e que apenas os donos dos comentários possam editá-los ou excluí-los.
- - CRUD de Usuários: Atualização de perfil, troca segura de senha (com re-autenticação) e exclusão de conta.
- - CRUD de Comentários: Criação, listagem limpa (sem exposição de versão __v), edição e exclusão.
- - Integridade Referencial (Exclusão em Cascata): Se um usuário deleta sua conta, todos os seus comentários são automaticamente removidos do banco.
- 
- Estrutura do Projeto:
- O código está organizado seguindo as melhores práticas para facilitar a manutenção e escalabilidade:
- - .env para variáveis de ambiente (não vai para o GitHub)
- - .gitignore para arquivos ignorados pelo Git
- - package.json para dependências do projeto
- - app.js - ponto de entrada (Configuração do Express e montagem das rotas)
- - src:
+![Node.js](https://img.shields.io/badge/Node.js-CommonJS-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-API-000000?style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
 
+API REST desenvolvida em Node.js para gerenciamento de usuários e publicações de comentários.
+O projeto implementa autenticação com JWT, criptografia de senhas, validações com Mongoose e controle de permissão para que apenas o autor possa editar ou excluir seus próprios comentários.
 
-│   - controllers/ - Lógica de negócio (userController.js, comentarioController.js)
+## Sumário
 
+- [Stack tecnológica](#stack-tecnológica)
+- [Funcionalidades](#funcionalidades)
+- [Demonstração e documentação](#demonstração-e-documentação)
+- [Estrutura do projeto](#estrutura-do-projeto)
+- [Pré-requisitos](#pré-requisitos)
+- [Como rodar o projeto](#como-rodar-o-projeto)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Rotas da API](#rotas-da-api)
+- [Fluxo recomendado de teste](#fluxo-recomendado-de-teste)
 
-│   - middlewares/ - Funções de interceptação (autenticacaoMiddleware.js)
+## Stack tecnológica
 
+- **Node.js**: ambiente de execução JavaScript.
+- **Express.js**: criação do servidor HTTP e gerenciamento das rotas.
+- **MongoDB**: banco de dados NoSQL usado para persistência.
+- **Mongoose**: modelagem dos dados, validações, schemas e hooks.
+- **Bcrypt.js**: criptografia das senhas antes de salvar no banco.
+- **JSON Web Token (JWT)**: autenticação e proteção de rotas privadas.
+- **Dotenv**: carregamento de variáveis de ambiente.
+- **Swagger UI + swagger-jsdoc**: documentação interativa da API.
+- **Git**: versionamento do código.
 
-│   - models/ - Schemas do banco de dados (userModel.js, comentarioModel.js)
+## Funcionalidades
 
+- Cadastro de usuários com senha criptografada.
+- Login com geração de token JWT.
+- Listagem de usuários cadastrados.
+- Atualização de perfil do usuário autenticado.
+- Troca segura de senha com confirmação da senha atual.
+- Exclusão da própria conta.
+- Remoção em cascata dos comentários ao excluir uma conta.
+- Criação de comentários vinculados ao usuário autenticado.
+- Listagem pública de comentários.
+- Edição de comentários apenas pelo autor.
+- Exclusão de comentários apenas pelo autor.
+- Validação de dados com Mongoose.
+- Documentação interativa com Swagger.
 
-│   - routes/ - Definição dos Endpoints (userRoutes.js, comentarioRoutes.js)
+## Demonstração e documentação
 
-Passo a Passo de como Rodar a Aplicação:
-1. Pré-requisitosCertifique-se de ter instalado em sua máquina:
- - Node.js (Versão LTS recomendada)
- - Git
- - Uma conta no MongoDB e MongoCompass
-2. Clonando o Repositório e Versionamento
-Este projeto utiliza Git para versionamento de código. Para baixar e inicializar:
-Clone o repositório com o bash:
-git clone https://github.com/Rafael-be/API-rest
+Com o servidor em execução, acesse a documentação interativa:
 
-Entre na pasta do projeto com o bash:
+```text
+http://localhost:3000/api-docs
+```
+
+Nessa página é possível visualizar os endpoints, os corpos esperados das requisições e testar a API diretamente pelo navegador.
+
+## Estrutura do projeto
+
+```text
+.
++-- app.js
++-- package.json
++-- package-lock.json
++-- README.md
+`-- src
+    +-- controllers
+    |   +-- comentarioController.js
+    |   `-- userControler.js
+    +-- middlewares
+    |   `-- autenticacaoMiddleware.js
+    +-- models
+    |   +-- comentarioModel.js
+    |   `-- userModel.js
+    +-- routes
+    |   +-- comentarioRoutes.js
+    |   `-- userRoutes.js
+    `-- swagger
+        `-- swagger.js
+```
+
+## Pré-requisitos
+
+Antes de começar, tenha instalado:
+
+- [Node.js](https://nodejs.org/) em versão LTS.
+- [Git](https://git-scm.com/).
+- Uma instância do MongoDB, local ou em nuvem.
+- Opcional: MongoDB Compass, Postman, Insomnia ou Talend API Tester para testar as rotas.
+
+## Como rodar o projeto
+
+Clone o repositório:
+
+```bash
+git clone https://github.com/Rafael-be/API-rest.git
+```
+
+Entre na pasta do projeto:
+
+```bash
 cd API-rest
+```
 
-3. Instalando as Dependências
- - Execute o comando abaixo para baixar as pastas node_modules:
- npm install
-4. Configurando as Variáveis de Ambiente (.env)
-Na raiz do projeto, crie um arquivo chamado .env e adicione as seguintes variáveis:
- - PORT=3000
- - MONGODB_URI=mongodb://localhost:27017/API-REST
- - JWT_SECRET=senha_secreta123@
+Instale as dependências:
 
-5. Iniciando o Servidor para rodar a aplicação em ambiente de desenvolvimento:
+```bash
+npm install
+```
+
+Crie um arquivo `.env` na raiz do projeto e configure as variáveis de ambiente conforme o exemplo da próxima seção.
+
+Inicie a aplicação:
+
+```bash
 node app.js
+```
 
-Você verá a mensagem: Servidor rodando na porta 3000! e a confirmação de conexão com o banco de dados.
+Se tudo estiver configurado corretamente, o terminal exibirá mensagens parecidas com:
 
-6. Rotas para teste de funcionalidades
-No talend, faça as seguintes coisas para ter a experiência de usuário completa:
+```text
+CONECTADO ao banco de dados
+Servidor rodando na porta 3000
+```
 
-Passo 1: Cadastro de Usuário
-Comece criando seu primeiro usuário. É recomendado criar pelo menos dois usuários para testar as travas de segurança de edição de comentários alheios.
- - Método: POST
- - URL: http://localhost:3000/api/users/cadastro
+## Variáveis de ambiente
 
-Body (JSON):
+Crie um arquivo chamado `.env` na raiz do projeto:
 
+```env
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/API-REST
+JWT_SECRET=sua_chave_secreta
+```
+
+Descrição das variáveis:
+
+| Variável | Obrigatória | Descrição |
+| --- | --- | --- |
+| `PORT` | Não | Porta em que o servidor será iniciado. Caso não seja informada, a API usa `3000`. |
+| `MONGODB_URI` | Sim | String de conexão com o MongoDB. |
+| `JWT_SECRET` | Sim | Chave usada para assinar e validar os tokens JWT. |
+
+> Nunca envie o arquivo `.env` para repositórios públicos. Use valores fortes e diferentes em produção.
+
+## Rotas da API
+
+### Usuários
+
+| Método | Rota | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `POST` | `/api/users/cadastro` | Não | Cadastra um novo usuário. |
+| `POST` | `/api/users/login` | Não | Autentica o usuário e retorna um token JWT. |
+| `GET` | `/api/users/mostrar` | Não | Lista os usuários cadastrados. |
+| `PATCH` | `/api/users/atualizar-perfil` | Sim | Atualiza `username`, `email` e/ou `bio`. |
+| `PATCH` | `/api/users/atualizar-senha` | Sim | Altera a senha após confirmar a senha atual. |
+| `DELETE` | `/api/users/deletar-conta` | Sim | Exclui a conta autenticada e seus comentários. |
+
+### Comentários
+
+| Método | Rota | Autenticação | Descrição |
+| --- | --- | --- | --- |
+| `POST` | `/api/comentarios/criar` | Sim | Cria um comentário para o usuário autenticado. |
+| `GET` | `/api/comentarios/mostrar` | Não | Lista todos os comentários. |
+| `PATCH` | `/api/comentarios/editar/:id` | Sim | Edita um comentário, desde que o usuário seja o autor. |
+| `DELETE` | `/api/comentarios/deletar/:id` | Sim | Remove um comentário, desde que o usuário seja o autor. |
+
+Para acessar rotas protegidas, envie o token JWT no header:
+
+```http
+Authorization: Bearer SEU_TOKEN_AQUI
+```
+
+## Fluxo recomendado de teste
+
+### 1. Cadastrar usuário
+
+```http
+POST /api/users/cadastro
+Content-Type: application/json
+```
+
+```json
 {
-  "username": "seu_nome",
-  "email": "exemplo@endereco.com",
+  "username": "rafael",
+  "email": "rafael@email.com",
   "password": "senha_segura",
-  "bio": "Bio"
+  "bio": "Desenvolvedor backend"
 }
+```
 
+### 2. Fazer login
 
-(Se quiser criar outra conta para ter melhor visão das próximas features, é recomendado)
+```http
+POST /api/users/login
+Content-Type: application/json
+```
 
-
-Passo 2: Login e Autenticação
-Faça login para gerar seu token de acesso. Sem ele, você não conseguirá acessar as rotas protegidas.
- - Método: POST
- - URL: http://localhost:3000/api/users/login
-
-Body (JSON):
-
+```json
 {
-  "email": "exemplo@endereco.com",
+  "email": "rafael@email.com",
   "password": "senha_segura"
 }
+```
 
+Copie o token retornado e utilize-o nas próximas rotas protegidas.
 
-IMPORTANTE: Copie o token gerado na resposta. No Talend, em todas as rotas abaixo, vá na aba Headers, adicione "Authorization" no nome e "Bearer (valor do TOKEN)" no valor.
+### 3. Criar comentário
 
+```http
+POST /api/comentarios/criar
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+```
 
-Passo 3: Mostrar todos os Usuários
-Veja a lista de todos os usuários cadastrados no sistema.
- - Método: GET
- - URL: http://localhost:3000/api/users/mostrar
-
-
-Passo 4: Criar um Comentário
-Agora que está autenticado, publique algo no sistema.
- - Método: POST
- - URL: http://localhost:3000/api/comentarios/criar
-
-Body (JSON):
-
+```json
 {
-  "titulo": "Titulo 1",
-  "conteudo": "Primeiro comentário"
+  "titulo": "Primeiro comentário",
+  "conteudo": "Esse é o conteúdo do meu primeiro comentário."
 }
+```
 
+### 4. Listar comentários
 
-Passo 5: Mostrar todos os Comentários
-Visualize todos os comentários publicados por todos os usuários.
- - Método: GET
- - URL: http://localhost:3000/api/comentarios/mostrar
+```http
+GET /api/comentarios/mostrar
+```
 
+### 5. Editar comentário
 
-Passo 6: Editar seu Comentário
-Atualize o título ou conteúdo de um comentário criado por você.
- - Método: PATCH
- - URL: http://localhost:3000/api/comentarios/editar/ID_DO_COMENTARIO
+```http
+PATCH /api/comentarios/editar/ID_DO_COMENTARIO
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+```
 
-Body (JSON):
-
+```json
 {
-  "titulo": "Titulo Atualizado",
-  "conteudo": "Conteúdo modificado"
+  "titulo": "Comentário atualizado",
+  "conteudo": "Conteúdo atualizado com sucesso."
 }
+```
 
+### 6. Atualizar perfil
 
-Passo 7: Atualizar Perfil e Senha
-Gerencie seus dados de conta.
-Perfil: PATCH em http://localhost:3000/api/users/atualizar-perfil 
+```http
+PATCH /api/users/atualizar-perfil
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+```
 
-Body: 
-
+```json
 {
- "username": "",
- "email": "",
- "bio": ""
- }
+  "username": "rafael_backend",
+  "email": "novo-email@email.com",
+  "bio": "Estudando Node.js, Express e MongoDB"
+}
+```
 
-Senha: PATCH em http://localhost:3000/api/users/atualizar-senha 
+### 7. Atualizar senha
 
-Body: 
+```http
+PATCH /api/users/atualizar-senha
+Authorization: Bearer SEU_TOKEN_AQUI
+Content-Type: application/json
+```
 
+```json
 {
- "senhaAtual": "",
- "novaSenha": ""
- }
+  "senhaAtual": "senha_segura",
+  "novaSenha": "nova_senha_segura"
+}
+```
 
+### 8. Excluir comentário
 
-Passo 8: Exclusão (Cascata)
-Teste a remoção de dados.
+```http
+DELETE /api/comentarios/deletar/ID_DO_COMENTARIO
+Authorization: Bearer SEU_TOKEN_AQUI
+```
 
-Deletar Comentário: DELETE em http://localhost:3000/api/comentarios/deletar/ID_DO_COMENTARIO
+### 9. Excluir conta
 
-Deletar Conta: DELETE em http://localhost:3000/api/users/deletar-conta 
+```http
+DELETE /api/users/deletar-conta
+Authorization: Bearer SEU_TOKEN_AQUI
+```
 
-(Isso removerá automaticamente todos os comentários do usuário).
+Ao excluir a conta, todos os comentários vinculados ao usuário também são removidos.
+
+## Observações importantes
+
+- Crie pelo menos dois usuários para testar a regra que impede editar ou excluir comentários de outra pessoa.
+- A senha nunca é retornada nas consultas de usuário.
+- O token JWT expira em `1d`, conforme definido no controller de usuários.
+- A documentação do Swagger é gerada a partir dos comentários presentes nos arquivos de rotas.
