@@ -1,10 +1,5 @@
 # API REST com Node.js, Express e MongoDB
 
-![Node.js](https://img.shields.io/badge/Node.js-CommonJS-339933?style=for-the-badge&logo=node.js&logoColor=white)
-![Express](https://img.shields.io/badge/Express.js-API-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-
 API REST desenvolvida em Node.js para gerenciamento de usuários e publicações de comentários.
 O projeto implementa autenticação com JWT, criptografia de senhas, validações com Mongoose e controle de permissão para que apenas o autor possa editar ou excluir seus próprios comentários.
 
